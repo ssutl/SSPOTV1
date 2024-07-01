@@ -2,11 +2,7 @@
 #include <WiFi.h>
 #include <Firebase_ESP_Client.h>
 #include "time.h"
-
-#define ssid 
-#define password 
-#define WebAPIKey 
-#define DatabaseURL 
+#include "config.h"  // This includes the wifi ssid, password, firebase api key and database url
 
 const long gmtOffset_sec = 3600;
 const int daylightOffset_sec = 3600;
@@ -43,7 +39,7 @@ void setup()
 {
   // Initialising serial and wifi
   WiFi.mode(WIFI_STA);
-  WiFi.begin(ssid, password);
+  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
 
   // Serial for debugging
   Serial.begin(115200);
@@ -66,8 +62,8 @@ void setup()
   configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
 
   // Once connected to wifi, sign up to firebase
-  config.api_key = WebAPIKey;
-  config.database_url = DatabaseURL;
+  config.api_key = WEB_API_KEY;
+  config.database_url = DATABASE_URL;
 
   if (Firebase.signUp(&config, &auth, "", ""))
   {
