@@ -35,6 +35,22 @@ String findFirstKey(String jsonString)
   return jsonString.substring(startPos + 1, endPos); // Extract and return the first key
 }
 
+void adjustTimeOffset()
+{
+  struct tm timeinfo;
+  if (!getLocalTime(&timeinfo))
+  {
+    Serial.println("Failed to obtain time");
+    return;
+  }
+
+  time_t now = mktime(&timeinfo);
+  struct tm *local = localtime(&now);
+  bool daylight = local->tm_isdst > 0;
+  int offset = daylight ? gmtOffset_sec + daylightOffset_sec : gmtOffset_sec;
+  configTime(offset, 0, ntpServer);
+}
+
 void setup()
 {
   // Initialising serial and wifi
@@ -59,7 +75,8 @@ void setup()
   }
 
   // init and get the time
-  configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
+  configTime(0, 0, ntpServer);
+  adjustTimeOffset();
 
   // Once connected to wifi, sign up to firebase
   config.api_key = WEB_API_KEY;
@@ -75,6 +92,8 @@ void setup()
   Firebase.begin(&config, &auth);
   Firebase.reconnectWiFi(true);
 }
+
+
 
 String getDateTimeString()
 {
