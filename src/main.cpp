@@ -135,21 +135,21 @@ void logSensorData()
         }
       }
 
-      float humidity = (response[3] << 8 | response[4]) / 10.0;
+      float moisture = (response[3] << 8 | response[4]) / 10.0;
       float temperature = (response[5] << 8 | response[6]) / 10.0;
       float conductivity = (response[7] << 8 | response[8]);
       Serial.println("Conductivity");
       Serial.println(conductivity);
       Serial.println("Temperature");
       Serial.println(temperature);
-      Serial.println("Humidity");
-      Serial.println(humidity);
+      Serial.println("Moisture");
+      Serial.println(moisture);
 
       // Get the current time
       String dateTime = getDateTimeString();
 
       // Skip logging if values are invalid
-      if (temperature > 60)
+      if (temperature > 60 || moisture > 100 || conductivity > 1000)
       {
         Serial.println("Invalid sensor readings detected. Skipping upload.");
         return;
@@ -160,7 +160,7 @@ void logSensorData()
         std::string path = "/SSPOTV1/" + std::string(dateTime.c_str());
 
         // Log only the specified values to Firebase under the new path
-        Firebase.RTDB.setFloat(&fbdo, path + "/Humidity", humidity);
+        Firebase.RTDB.setFloat(&fbdo, path + "/Moisture", moisture);
         Firebase.RTDB.setFloat(&fbdo, path + "/Temperature", temperature);
         Firebase.RTDB.setFloat(&fbdo, path + "/Conductivity", conductivity);
       }
