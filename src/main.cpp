@@ -2,8 +2,8 @@
 #include <WiFi.h>
 #include <Firebase_ESP_Client.h>
 #include "time.h"
-// #include "config.h"  // This includes the wifi ssid, password, firebase api key and database url
-#include <WifiManager.h>
+#include "config.h"  // This includes the wifi ssid, password, firebase api key and database url
+#include <WiFiManager.h> 
 
 const long gmtOffset_sec = 3600;
 const int daylightOffset_sec = 3600;
@@ -21,8 +21,8 @@ HardwareSerial RS485Serial(1);
 
 bool signUpOK = false;
 
-// const uint8_t npkRequest[] = {0x01, 0x03, 0x00, 0x00, 0x00, 0x07, 0x04, 0x08};
-const uint8_t npkRequest[] = {0x01, 0x03, 0x00, 0x00, 0x00, 0x03, 0x05, 0xCB}; //FOR TCS sensor 
+const uint8_t npkRequest[] = {0x01, 0x03, 0x00, 0x00, 0x00, 0x07, 0x04, 0x08};
+// const uint8_t npkRequest[] = {0x01, 0x03, 0x00, 0x00, 0x00, 0x03, 0x05, 0xCB}; //FOR TCS sensor 
 
 
 String findFirstKey(String jsonString)
@@ -65,7 +65,7 @@ void setup() {
   // wifiManager.resetSettings();
 
   // Set the SSID of the configuration portal
-  wifiManager.autoConnect("SSPOT");
+  wifiManager.autoConnect("SSPOTV1");
 
   // Wait for connection
   if (WiFi.status() == WL_CONNECTED) {
@@ -144,7 +144,7 @@ void logSensorData()
     if (response[1] == 0x03)
     { // Check if the function code matches
 
-      if (Firebase.RTDB.get(&fbdo, "/SSPOTV1-01"))
+      if (Firebase.RTDB.get(&fbdo, "/SSPOTV1"))
       {
         if (fbdo.dataType() == "json")
         {
@@ -156,7 +156,7 @@ void logSensorData()
           {
             String jsonString = fbdo.jsonString();
             String firstKey = findFirstKey(jsonString);
-            std::string path = "/SSPOTV1-01/" + std::string(firstKey.c_str());
+            std::string path = "/SSPOTV1/" + std::string(firstKey.c_str());
             Firebase.RTDB.deleteNode(&fbdo, path);
           }
         }
@@ -184,7 +184,7 @@ void logSensorData()
       else
       {
         // Construct new database path
-        std::string path = "/SSPOTV1-01/" + std::string(dateTime.c_str());
+        std::string path = "/SSPOTV1/" + std::string(dateTime.c_str());
 
         // Log only the specified values to Firebase under the new path
         Firebase.RTDB.setFloat(&fbdo, path + "/Moisture", moisture);
