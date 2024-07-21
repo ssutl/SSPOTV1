@@ -2,7 +2,8 @@
 #include <WiFi.h>
 #include <Firebase_ESP_Client.h>
 #include "time.h"
-#include "config.h"  // This includes the wifi ssid, password, firebase api key and database url
+// #include "config.h"  // This includes the wifi ssid, password, firebase api key and database url
+#include <WifiManager.h>
 
 const long gmtOffset_sec = 3600;
 const int daylightOffset_sec = 3600;
@@ -20,8 +21,8 @@ HardwareSerial RS485Serial(1);
 
 bool signUpOK = false;
 
-const uint8_t npkRequest[] = {0x01, 0x03, 0x00, 0x00, 0x00, 0x07, 0x04, 0x08};
-// const uint8_t npkRequest[] = {0x01, 0x03, 0x00, 0x00, 0x00, 0x03, 0x05, 0xCB}; //FOR TCS sensor 
+// const uint8_t npkRequest[] = {0x01, 0x03, 0x00, 0x00, 0x00, 0x07, 0x04, 0x08};
+const uint8_t npkRequest[] = {0x01, 0x03, 0x00, 0x00, 0x00, 0x03, 0x05, 0xCB}; //FOR TCS sensor 
 
 
 String findFirstKey(String jsonString)
@@ -53,14 +54,27 @@ void adjustTimeOffset()
   configTime(offset, 0, ntpServer);
 }
 
-void setup()
-{
-  // Initialising serial and wifi
-  WiFi.mode(WIFI_STA);
-  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
-
-  // Serial for debugging
+void setup() {
+  // Initialize serial for debugging
   Serial.begin(115200);
+
+  // Initialize WiFiManager
+  WiFiManager wifiManager;
+
+  // Uncomment the following line if you want to reset the saved WiFi credentials
+  // wifiManager.resetSettings();
+
+  // Set the SSID of the configuration portal
+  wifiManager.autoConnect("SSPOT");
+
+  // Wait for connection
+  if (WiFi.status() == WL_CONNECTED) {
+    Serial.println("WiFi connected!");
+  } else {
+    Serial.println("Failed to connect to WiFi. Restarting...");
+    ESP.restart(); // Restart the ESP if it fails to connect
+  }
+
   // Serial for RS485
   RS485Serial.begin(4800, SERIAL_8N1, recievePin, transmitPin);
 
@@ -68,32 +82,24 @@ void setup()
   pinMode(max3485_RE_DE, OUTPUT);
   digitalWrite(max3485_RE_DE, LOW);
 
-  // Wait for connection
-  while (WiFi.status() != WL_CONNECTED)
-  {
-    Serial.print(".");
-    // wait 10 seconds for connection:
-    delay(1000);
-  }
-
-  // init and get the time
+  // Init and get the time
   configTime(0, 0, ntpServer);
   adjustTimeOffset();
 
-  // Once connected to wifi, sign up to firebase
+  // Once connected to WiFi, sign up to Firebase
   config.api_key = WEB_API_KEY;
   config.database_url = DATABASE_URL;
 
-  if (Firebase.signUp(&config, &auth, "", ""))
-  {
+  if (Firebase.signUp(&config, &auth, "", "")) {
     Serial.println("SignUp Ok");
     signUpOK = true;
   }
 
-  // Begin firebase
+  // Begin Firebase
   Firebase.begin(&config, &auth);
   Firebase.reconnectWiFi(true);
 }
+
 
 
 
