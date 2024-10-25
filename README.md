@@ -1,10 +1,3 @@
-Here’s a **README** and **About** for **SSPOTV1**:
-
----
-
-## About
-
-> 🌱 **SSPOTV1**: A smart planter tracker created to monitor plant metrics. This project integrates sensors and metrics tracking, using code to gather and visualize data for optimal plant care. Originally designed and built from scratch, it features real-time monitoring and responsive tracking for a healthier growing environment.
 
 
 
